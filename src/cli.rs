@@ -1,5 +1,6 @@
 //! 命令行入口：参数解析、子命令分派与退出码。
 use crate::control;
+use crate::init;
 use crate::{
     hidden_readiness_blockers, load_json, readiness_blockers, spec_digest,
     validate_baseline_results, validate_eval_results, validate_hidden_spec, validate_spec,
@@ -24,6 +25,8 @@ pub struct Options {
 }
 #[derive(Subcommand)]
 enum Command {
+    /// Scaffold a hello-world environment (worker / manager / suite).
+    Init(init::Init),
     /// Manager / standalone worker contract v1 (no authentication).
     Control {
         #[command(subcommand)]
@@ -153,6 +156,7 @@ fn validate(kind: &Validation) -> Result<i32> {
 }
 fn execute(options: &Options) -> Result<i32> {
     match &options.command {
+        Command::Init(options) => init::run(options)?,
         Command::Control { action } => control::run(options.base.as_deref(), action)?,
         Command::Validate { kind } => return validate(kind),
         Command::Digest { file, baseline } => {

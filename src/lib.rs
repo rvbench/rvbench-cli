@@ -4,6 +4,7 @@ pub mod cli;
 pub mod control;
 pub mod files;
 pub mod hidden;
+pub mod init;
 pub mod results;
 pub mod spec;
 
@@ -56,35 +57,30 @@ pub fn unique(errors: &mut Vec<String>, values: Vec<String>, label: &str) {
         format!("duplicate {label}"),
     );
 }
+/// 编译期嵌入的合同 schema 原文；`init` 会把同一份副本写到生成环境里。
+pub fn schema_text(kind: &str) -> Option<&'static str> {
+    Some(match kind {
+        "spec" => include_str!("../contracts/schemas/spec.schema.json"),
+        "hidden" => include_str!("../contracts/schemas/spec.hidden.schema.json"),
+        "results" => include_str!("../contracts/schemas/eval_results.schema.json"),
+        "baseline-results" => include_str!("../contracts/schemas/baseline_results.schema.json"),
+        _ => return None,
+    })
+}
 pub fn schema_errors(value: &Value, kind: &str) -> Vec<String> {
     use std::sync::OnceLock;
     static PUBLIC: OnceLock<jsonschema::Validator> = OnceLock::new();
     static HIDDEN: OnceLock<jsonschema::Validator> = OnceLock::new();
     static RESULTS: OnceLock<jsonschema::Validator> = OnceLock::new();
     static BASELINE_RESULTS: OnceLock<jsonschema::Validator> = OnceLock::new();
-    let (cell, text, formats) = match kind {
-        "spec" => (
-            &PUBLIC,
-            include_str!("../contracts/schemas/spec.schema.json"),
-            false,
-        ),
-        "hidden" => (
-            &HIDDEN,
-            include_str!("../contracts/schemas/spec.hidden.schema.json"),
-            false,
-        ),
-        "results" => (
-            &RESULTS,
-            include_str!("../contracts/schemas/eval_results.schema.json"),
-            true,
-        ),
-        "baseline-results" => (
-            &BASELINE_RESULTS,
-            include_str!("../contracts/schemas/baseline_results.schema.json"),
-            true,
-        ),
+    let (cell, formats) = match kind {
+        "spec" => (&PUBLIC, false),
+        "hidden" => (&HIDDEN, false),
+        "results" => (&RESULTS, true),
+        "baseline-results" => (&BASELINE_RESULTS, true),
         _ => return vec!["unknown schema".into()],
     };
+    let text = schema_text(kind).expect("known schema kind");
     let validator = cell.get_or_init(|| {
         let schema: Value = serde_json::from_str(text).expect("embedded schema is JSON");
         jsonschema::options()

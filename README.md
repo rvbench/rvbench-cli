@@ -18,6 +18,31 @@ rvbench --help
 rb-cli --help        # 同一套子命令
 ```
 
+## 初始化
+
+`rb-cli init` 从 GitHub 拉取组件，生成一个能跑通 hello-world 的本地环境：worker / manager 源码与配置、hello-world suite、合同 schema、可直接提交的 `JobRequest`，以及 Makefile 与记录来源和内容摘要的 `rvbench.init.json`。
+
+```sh
+rb-cli init demo                              # worker + manager + suite
+rb-cli init demo --worker --backend k1        # 只要 worker（manager: null，独立模式）
+rb-cli init demo --source git                 # 走本机 git 凭据，适合私有仓
+rb-cli init demo --source local --local-root ../code_repos   # 离线，复制本地检出
+```
+
+| 选项 | 说明 |
+| --- | --- |
+| `--worker` / `--manager` / `--suite` | 选择组件；都不给时三者全要 |
+| `--source github\|git\|local` | `github` 拉 tarball（私有仓需 `GH_TOKEN` / `GITHUB_TOKEN`），`git` 走 `git clone`，`local` 复制本地检出 |
+| `--ref` | 分支 / 标签 / 提交，默认 `main` |
+| `--backend k3\|k1` | 写进 worker 配置与示例 `JobRequest` |
+| `--manager-port` / `--worker-port` / `--bind` | 生成的监听地址，默认 `127.0.0.1:18800` / `18801` |
+| `--proxy` | GitHub 下载走代理 |
+| `--build` | 生成后顺手 `cargo build --release --locked` |
+| `--force` | 覆盖已存在的目录（目标目录默认必须为空） |
+| `--json` | 输出清单而不是人类可读摘要 |
+
+生成后按目录里的 `README.md` / `Makefile` 走：`make build` → `make manager` / `make worker` → `make validate` → `make submit`。`config.json` 里的 `data_dir` 是相对路径，服务从环境根目录启动，整个目录可以原样搬到板端；`--force` 重跑会重拉组件并覆盖配置，`data/` 保留。
+
 ## 控制面
 
 `--base` 指向 manager（默认 `http://127.0.0.1:18800`）或独立 worker 的 18801；直连 worker 时加 `--direct`。
