@@ -56,6 +56,23 @@ rvbench control cancel JOB_UUID              # 取消未运行任务
 rvbench control drain WORKER_ID              # 排空节点
 ```
 
+## 直连 worker
+
+不经过 manager，直接打 worker 的 `/jobs`。`--base` 省略时默认 `http://127.0.0.1:18801`。
+
+```sh
+rvbench --base http://10.18.60.18:18801 worker submit job.json --wait
+rvbench --base http://10.18.60.18:18801 worker submit job.json --wait --quiet   # 只回 "<job_id> <state>"
+rvbench --base http://10.18.60.18:18801 worker get JOB_UUID
+rvbench --base http://10.18.60.18:18801 worker cancel JOB_UUID
+rvbench --base http://10.18.60.18:18801 worker capabilities
+rvbench --base http://10.18.60.18:18801 worker metrics
+```
+
+作业文件两种都收：裸 `JobRequest`，或 `{"request": ...}` 包装；提交前按合同 schema 校验，请求体固定是 `WorkerSubmission`。
+
+`--wait` 会轮询到终态；终态不是 `done` 时退出码为 3，便于脚本判断。HTTP 失败退出码为 1，错误优先显示合同里的 `error` 字段。指向回环地址时不走 `HTTP_PROXY`。
+
 ## 离线校验
 
 不访问网络；合同 schema 在编译期嵌入，单个二进制即可校验任意文档。
@@ -78,7 +95,8 @@ rvbench digest examples/baseline/spec.json --baseline torch_abs
 
 - `spec` / `results` / `baseline` / `hidden`：schema 与语义校验、readiness、摘要
 - `files`：原子写入
-- `control`：HTTP 客户端
+- `control`：manager 的队列与集群接口
+- `worker`：直连单个 worker 的提交、查询、取消与能力读取
 
 `json`（严格解析、canonical 序列化、SHA-256）来自 `rvbench-protocol`，与 manager / worker 共用同一实现。
 

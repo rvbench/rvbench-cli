@@ -7,6 +7,7 @@ pub mod hidden;
 pub mod init;
 pub mod results;
 pub mod spec;
+pub mod worker;
 
 pub use baseline::validate_baseline_results;
 pub use hidden::{hidden_readiness_blockers, resolve_hidden_case, validate_hidden_spec};

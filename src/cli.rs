@@ -1,6 +1,7 @@
 //! 命令行入口：参数解析、子命令分派与退出码。
 use crate::control;
 use crate::init;
+use crate::worker;
 use crate::{
     hidden_readiness_blockers, load_json, readiness_blockers, spec_digest,
     validate_baseline_results, validate_eval_results, validate_hidden_spec, validate_spec,
@@ -31,6 +32,11 @@ enum Command {
     Control {
         #[command(subcommand)]
         action: control::Action,
+    },
+    /// Submit and inspect jobs on one worker, without a manager.
+    Worker {
+        #[command(subcommand)]
+        action: worker::Action,
     },
     Validate {
         #[command(subcommand)]
@@ -158,6 +164,7 @@ fn execute(options: &Options) -> Result<i32> {
     match &options.command {
         Command::Init(options) => init::run(options)?,
         Command::Control { action } => control::run(options.base.as_deref(), action)?,
+        Command::Worker { action } => return worker::run(options.base.as_deref(), action),
         Command::Validate { kind } => return validate(kind),
         Command::Digest { file, baseline } => {
             let spec = load_json(file)?;
