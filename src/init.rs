@@ -671,7 +671,7 @@ fn worker_config(options: &Init, with_manager: bool) -> Value {
         "board_id": "local-hello-world",
         "data_dir": "data/worker",
         "kinds": ["func", "correctness", "performance"],
-        "delivery": "hybrid",
+        "delivery": "pull",
         "manager": with_manager.then(|| format!("http://{host}:{}", options.manager_port)),
         "backend": {
             "backend": options.backend.as_str(),
