@@ -33,6 +33,11 @@ enum Command {
         #[command(subcommand)]
         action: control::Action,
     },
+    /// Login, status and logout against a manager's /auth/* endpoints.
+    Auth {
+        #[command(subcommand)]
+        action: crate::auth::Action,
+    },
     /// Submit and inspect jobs on one worker, without a manager.
     Worker {
         #[command(subcommand)]
@@ -164,6 +169,7 @@ fn execute(options: &Options) -> Result<i32> {
     match &options.command {
         Command::Init(options) => init::run(options)?,
         Command::Control { action } => control::run(options.base.as_deref(), action)?,
+        Command::Auth { action } => crate::auth::run(options.base.as_deref(), action)?,
         Command::Worker { action } => return worker::run(options.base.as_deref(), action),
         Command::Validate { kind } => return validate(kind),
         Command::Digest { file, baseline } => {

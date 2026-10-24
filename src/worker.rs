@@ -41,12 +41,21 @@ pub enum Action {
     Capabilities,
     /// Print the worker's Prometheus metrics as plain text.
     Metrics,
+    /// Manager 面向的 worker 记录管理（create / login / status / logout）。
+    Manage {
+        #[command(subcommand)]
+        action: crate::worker_cmd::Action,
+    },
 }
 
 pub fn run(base: Option<&str>, action: &Action) -> Result<i32> {
+    if let Action::Manage { action } = action {
+        return crate::worker_cmd::run(base, action);
+    }
     let base = base.unwrap_or(DEFAULT_WORKER).trim_end_matches('/');
     let client = client_for(base)?;
     match action {
+        Action::Manage { .. } => unreachable!("handled above"),
         Action::Submit { file, wait, quiet } => {
             let submission = read_submission(file)?;
             let response = client

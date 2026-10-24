@@ -76,6 +76,9 @@ pub fn run(base: Option<&str>, action: &Action) -> Result<()> {
         ),
     };
     let mut req = client.request(method, format!("{base}{path}"));
+    if let Some(header) = crate::auth::bearer_header(base) {
+        req = req.header("Authorization", header);
+    }
     if let Some(body) = body {
         req = req.json(&body);
     }

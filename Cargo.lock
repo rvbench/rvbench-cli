@@ -1540,6 +1540,7 @@ dependencies = [
  "jsonschema",
  "reqwest",
  "rvbench-protocol",
+ "serde",
  "serde_json",
  "tar",
  "tempfile",

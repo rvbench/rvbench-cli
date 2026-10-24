@@ -1,4 +1,5 @@
 //! Contract validation, digests and the `rvbench` client library.
+pub mod auth;
 pub mod baseline;
 pub mod cli;
 pub mod control;
@@ -8,6 +9,7 @@ pub mod init;
 pub mod results;
 pub mod spec;
 pub mod worker;
+pub mod worker_cmd;
 
 pub use baseline::validate_baseline_results;
 pub use hidden::{hidden_readiness_blockers, resolve_hidden_case, validate_hidden_spec};

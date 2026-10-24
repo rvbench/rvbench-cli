@@ -26,6 +26,7 @@ flate2 = "1"
 jsonschema = { version = "0.49.9", default-features = false }
 reqwest = { version = "0.12", default-features = false, features = ["blocking", "json", "rustls-tls"] }
 rvbench-protocol = { git = "https://github.com/rvbench/rvbench-core-rust.git", rev = "6dbacf8d9d24140c6436e08fd8c495ef0b9793bc" }
+serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["arbitrary_precision", "float_roundtrip"] }
 tar = "0.4"
 uuid = { version = "1", features = ["v4", "v7", "serde"] }
